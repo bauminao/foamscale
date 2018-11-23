@@ -48,7 +48,8 @@
 
 #include <TinyWireS.h>
 
-int i=0;
+int i=42;
+bool an=true;
 
 void setup()
 {
@@ -61,6 +62,14 @@ void setup()
 
   // Turn on LED when program starts
   digitalWrite(LED, HIGH);
+  tws_delay(500);
+  digitalWrite(LED,LOW);
+  tws_delay(500);
+  digitalWrite(LED,HIGH);
+  tws_delay(500);
+  digitalWrite(LED,LOW);
+  tws_delay(500);
+  digitalWrite(LED,HIGH);
 }
 
 void loop()
@@ -73,13 +82,16 @@ void loop()
 void requestEvent()
 {
     TinyWireS.send(i);
-    digitalWrite(LED,LOW);
-    tws_delay(500);
-    digitalWrite(LED,HIGH);
-    tws_delay(500);
-    digitalWrite(LED,LOW);
-    tws_delay(500);
-    digitalWrite(LED,HIGH);
-
     i++;
+    if (an) 
+    {
+      digitalWrite(LED,LOW); 
+      an=false;
+    }
+    else 
+    { 
+      digitalWrite(LED,HIGH);
+      an=true;
+    }
+
 }
