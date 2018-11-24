@@ -9,16 +9,22 @@ U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);   // Adafr
 
 void setup() {
   u8x8.begin();
-  u8x8.setPowerSave(0);
+  u8x8.setPowerSave(false);
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.drawString(0,0,"Init");
-  Wire.begin();        // join i2c bus (address optional for master)
+
+  Wire.begin();
+
   Serial.begin(115200);
+
+
   delay(1000);
 }
 
 void loop()
 {
+  u8x8.begin();
+  u8x8.setPowerSave(false);
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.drawString(0,0,"Reading");
 
@@ -30,6 +36,7 @@ void loop()
     Serial.println(i); // print the character
     char buf[12];
     sprintf (buf, "%1i", i);
+    u8x8.drawString(0,2,"       ");
     u8x8.drawString(0,2,buf);
     u8x8.refreshDisplay();  // only required for SSD1606/7
     }
