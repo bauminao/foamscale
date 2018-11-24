@@ -48,53 +48,68 @@
 
 #include <TinyWireS.h>
 
-int i=1;
-bool an=true;
 
-void setup()
+
+byte voltage=0;
+byte *cap;
+
+byte measure(void)
 {
-  pinMode(LED, OUTPUT);
-  pinMode(ADC, INPUT);
+  initADC();
 
-  TinyWireS.begin(I2C_SLAVE_ADDRESS); // join i2c network
-  //TinyWireS.onReceive(receiveEvent); // not using this
-  TinyWireS.onRequest(requestEvent);
+  ADCSRA |= (1 << ADSC);         // start ADC measurement
+  
+  while (ADCSRA & (1 << ADSC) ); // wait till conversion complete
+  /*
 
-  // Turn on LED when program starts
-  digitalWrite(LED, HIGH);
-  tws_delay(500);
-  digitalWrite(LED,LOW);
-  tws_delay(500);
-  digitalWrite(LED,HIGH);
-  tws_delay(500);
-  digitalWrite(LED,LOW);
-  tws_delay(500);
-  digitalWrite(LED,HIGH);
+  if (ADCH > 128)
+    {
+     // ADC input voltage is more than half of VCC
+
+    } else {
+
+     // ADC input voltage is less than half of VCC
+
+    } 
+
+  //return ADCH;
+  */
+  return ADCH;
+
 }
 
-void loop()
+byte* measure_cap(void)
 {
-    // This needs to be here
-    TinyWireS_stop_check();
+  byte _voltage[8];
+  initADC();
+
+  for (byte i=0; i<8; i++)
+  {
+    ADCSRA |= (1 << ADSC);         // start ADC measurement
+    while (ADCSRA & (1 << ADSC) ); // wait till conversion complete
+  }
+
+  return _voltage;
+
 }
 
 // Gets called when the ATtiny receives an i2c request
 void requestEvent()
 {
-    byte voltage=measure();
-    TinyWireS.send(voltage);
-    //TinyWireS.send(i);
-    if (an) 
-    {
-      digitalWrite(LED,LOW); 
-      an=false;
-    }
-    else 
-    { 
-      digitalWrite(LED,HIGH);
-      an=true;
-    }
+    byte data[8];
+    data[0] = cap[0];
+    data[1] = cap[1];
+    data[2] = cap[2];
+    data[3] = cap[3];
+    data[4] = cap[4];
+    data[5] = cap[5];
+    data[6] = cap[6];
+    data[7] = cap[7];
 
+    for (byte j=0; j < 8; ++j)
+    {
+      TinyWireS.send(data[j]);
+    }
 }
 
 void initADC()
@@ -143,29 +158,33 @@ void initADC()
             (0 << ADPS0);      // set prescaler to 64, bit 0
 }
 
-byte measure(void)
+void setup()
 {
-  initADC();
-  ++i;
+  pinMode(LED, OUTPUT);
+  pinMode(ADC, INPUT);
 
-  ADCSRA |= (1 << ADSC);         // start ADC measurement
-  /*
-  while (ADCSRA & (1 << ADSC) ); // wait till conversion complete
-  /*
+  TinyWireS.begin(I2C_SLAVE_ADDRESS); // join i2c network
+  //TinyWireS.onReceive(receiveEvent); // not using this
+  TinyWireS.onRequest(requestEvent);
 
-  if (ADCH > 128)
-    {
-     // ADC input voltage is more than half of VCC
-
-    } else {
-
-     // ADC input voltage is less than half of VCC
-
-    } 
-
-  //return ADCH;
-  */
-  return i;
-
+  // Turn on LED when program starts
+  digitalWrite(LED, HIGH);
+  tws_delay(500);
+  digitalWrite(LED,LOW);
+  tws_delay(500);
+  digitalWrite(LED,HIGH);
+  tws_delay(500);
+  digitalWrite(LED,LOW);
+  tws_delay(500);
+  digitalWrite(LED,HIGH);
 }
+
+void loop()
+{
+    // This needs to be here
+    TinyWireS_stop_check();
+    voltage = measure();
+    cap     = measure_cap();
+}
+
 
