@@ -64,52 +64,7 @@ void check_if_exist_I2C() {
   //delay(1000);           // wait 1 seconds for next scan, did not find it necessary
 }
 
-void check_data_I2C() {
-  byte error, address;
-  int nDevices;
-  nDevices = 0;
-  for (address = 1; address < 127; address++ )  {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-
-    if (error == 0){
-      Serial.print("I2C sensor found at address 0x");
-      if (address < 16)
-        Serial.print("0");
-      Serial.print(address, HEX);
-      Serial.println("  !");
-
-      nDevices++;
-    } else if (error == 4) {
-      Serial.print("Unknow error at address 0x");
-      if (address < 16)
-        Serial.print("0");
-      Serial.println(address, HEX);
-    }
-  } //for loop
-  if (nDevices == 0)
-    Serial.println("No I2C devices found");
-  else
-    Serial.println("**********************************\n");
-  //delay(1000);           // wait 1 seconds for next scan, did not find it necessary
-}
 
 void loop() {
-  byte error=0;
-
-  Serial.println("");
-  Serial.println("Now that we search, we will ask:");
-  Serial.println("");
-  delay(5000);
-  Wire.begin(4, 5);
-  check_if_exist_I2C();
-  Wire.beginTransmission(0x11);
-  Wire.write("x");
-  error = Wire.endTransmission();
-
-
 }
 
