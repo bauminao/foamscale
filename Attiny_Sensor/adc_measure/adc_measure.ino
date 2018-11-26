@@ -16,8 +16,7 @@
 
 #include <TinyWireS.h>
 
-
-int sensordata=0;
+int sensordata=29;
 
 void initADC()
 // 10 Bit 
@@ -39,7 +38,7 @@ void initADC()
             (1 << ADPS0);      // set prescaler to 128, bit 0
 }
 
-int measure_ADC(void)
+int measure_adc(void)
 {
   initADC();
 
@@ -54,8 +53,37 @@ int measure_ADC(void)
   raw_adc = ADCH<<8 | adc_lobyte;   // add lobyte and hibyte
 
   return raw_adc;
-
 }
+
+int measure_cap(void)
+{
+  initADC();
+  uint16_t cap=0;
+  uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
+
+  byte measure_count = 10;
+
+  digitalWrite(PIN, LOW);
+  digitalWrite(PIN, HIGH);
+
+  uint16_t raw_adc[measure_count];
+  for (byte i=0 ; i<measure_count ; i++)
+  {
+    ADCSRA |= (1 << ADSC);         // start ADC measurement
+    while (ADCSRA & (1 << ADSC) ); // wait till conversion complete
+
+    // for 10-bit resolution:
+    adc_lobyte = ADCL; // get the sample value from ADCL
+    raw_adc[i] = ADCH<<8 | adc_lobyte;   // add lobyte and hibyte
+  }
+
+  cap = raw_adc[0];
+
+  digitalWrite(PIN, LOW);
+
+  return cap;
+}
+
 
 
 void requestEvent()
@@ -70,6 +98,7 @@ void requestEvent()
 void setup()
 {
   pinMode(LED, OUTPUT);
+  pinMode(PIN, OUTPUT);
   pinMode(ADC, INPUT);
 
   TinyWireS.begin(I2C_SLAVE_ADDRESS); 
@@ -89,8 +118,11 @@ void setup()
 
 void loop()
 {
+  //sensordata = 512;
+  sensordata = measure_cap();
+  //sensordata = measure_adc();
   TinyWireS_stop_check();
-  sensordata = measure_ADC();
+
 }
 
 
