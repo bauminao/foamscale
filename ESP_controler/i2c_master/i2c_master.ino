@@ -29,16 +29,22 @@ void setup() {
 void loop()
 {
   // Ask at sensor about measurement
-  Wire.requestFrom(4, 8); // request 1 byte from slave device address 4
+  Wire.requestFrom(4, 2); // request 1 byte from slave device address 4
 
-  byte data[10];
-  char buf[8][2];
+  int data = 0;
+  char buf[5];
+  byte receive[4];
+  receive[0] = 1;
+  receive[1] = 1;
+  receive[2] = 1;
+  receive[3] = 1;
+
   byte i = 0;
 
   while(Wire.available()) // slave may send less than requested
   {
-    data[i] = Wire.read(); // receive a byte as character
-    ++i;
+    receive[i] = Wire.read();
+    i++;
   }
   
   u8x8.begin();
@@ -46,18 +52,11 @@ void loop()
   u8x8.drawString(0,0,"Reading");
   u8x8.drawString(0,2,"       ");
 
-  for (i=0; i<=3; ++i)
+  for (int j=0; j < 4; j++)
   {
-    Serial.println(data[i]);
-    itoa(data[i], buf[i],10);
-    u8x8.drawString((i*4) , 2 , buf[i]);
-  }
-
-  for (i=4; i<=7; ++i)
-  {
-    Serial.println(data[i]);
-    itoa(data[i], buf[i],10);
-    u8x8.drawString(((i-4)*4) , 3 , buf[i]);
+    Serial.println(receive[j]);
+    itoa(receive[j], buf, 10);
+    u8x8.drawString( (j*4) , 2 , buf);
   }
 
   delay(5000);
