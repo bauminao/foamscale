@@ -58,6 +58,11 @@ void loop()
     itoa(receive[j], buf, 10);
     u8x8.drawString( (j*4) , 2 , buf);
   }
+  int intvalue = ((receive[0] & 0xFF) << 8) | (receive[1] & 0xFF);
+  itoa(intvalue, buf, 10);
+  u8x8.drawString( 0 , 4 , buf);
+
+
 
   delay(5000);
 }

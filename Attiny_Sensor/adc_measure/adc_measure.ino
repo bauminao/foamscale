@@ -20,29 +20,12 @@
 int sensordata=0;
 
 void initADC()
-{
-// 8 Bit
-//  ADMUX =
-//            (1 << ADLAR) |     // left shift result
-//            (0 << REFS1) |     // Sets ref. voltage to VCC, bit 1
-//            (0 << REFS0) |     // Sets ref. voltage to VCC, bit 0
-//            (0 << MUX3)  |     // use ADC2 for input (PB4), MUX bit 3
-//            (0 << MUX2)  |     // use ADC2 for input (PB4), MUX bit 2
-//            (1 << MUX1)  |     // use ADC2 for input (PB4), MUX bit 1
-//            (0 << MUX0);       // use ADC2 for input (PB4), MUX bit 0
-//
-//  ADCSRA =
-//            (1 << ADEN)  |     // Enable ADC
-//            (1 << ADPS2) |     // set prescaler to 64, bit 2
-//            (1 << ADPS1) |     // set prescaler to 64, bit 1
-//            (0 << ADPS0);      // set prescaler to 64, bit 0
-
-
 // 10 Bit 
+{
   ADMUX =
      (0 << ADLAR) |     // do not left shift result (for 10-bit values)
-            (0 << REFS2) |     // Sets ref. voltage to internal 1.1V, bit 2
-            (1 << REFS1) |     // Sets ref. voltage to internal 1.1V, bit 1
+            (1 << REFS2) |     // Sets ref. voltage to internal 1.1V, bit 2
+            (0 << REFS1) |     // Sets ref. voltage to internal 1.1V, bit 1
             (0 << REFS0) |     // Sets ref. voltage to internal 1.1V, bit 0
             (0 << MUX3)  |     // use ADC2 for input (PB4), MUX bit 3
             (0 << MUX2)  |     // use ADC2 for input (PB4), MUX bit 2
@@ -56,17 +39,9 @@ void initADC()
             (1 << ADPS0);      // set prescaler to 128, bit 0
 }
 
-byte measure(void)
+int measure_ADC(void)
 {
   initADC();
-
-  //ADCSRA |= (1 << ADSC);         // start ADC measurement
-  //
-  //while (ADCSRA & (1 << ADSC) ); // wait till conversion complete
-  //
-  //byte sensorvalue = ADCH;
-
-  //return sensorvalue;
 
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
   uint16_t raw_adc;
@@ -83,16 +58,12 @@ byte measure(void)
 }
 
 
-//int measure(void)
-//{
-//  int sensorValue = analogRead(ADC);
-//  return sensorValue;
-//}
-
-
 void requestEvent()
 {
-  TinyWireS.send(sensordata);
+  byte high = (byte)(sensordata>>8);
+  byte low  = sensordata & 0xff;
+  TinyWireS.send(high);
+  TinyWireS.send(low);
 }
 
 
@@ -119,7 +90,7 @@ void setup()
 void loop()
 {
   TinyWireS_stop_check();
-  sensordata = measure ();
+  sensordata = measure_ADC();
 }
 
 
