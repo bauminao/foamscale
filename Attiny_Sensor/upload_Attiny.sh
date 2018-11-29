@@ -1,4 +1,4 @@
-avrdude -c USBasp \
+avrdude -c USBasp-clone \
         -p t85 \
         -U flash:w:$1 
 

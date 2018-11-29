@@ -18,7 +18,7 @@
 
 int sensordata=29;
 
-void initADC()
+void initADC_10Bit()
 // 10 Bit 
 {
   ADMUX =
@@ -35,12 +35,34 @@ void initADC()
             (1 << ADEN)  |     // Enable ADC
             (1 << ADPS2) |     // set prescaler to 128, bit 2
             (1 << ADPS1) |     // set prescaler to 128, bit 1
-            (1 << ADPS0);      // set prescaler to 128, bit 0
+            (0 << ADPS0);      // set prescaler to 128, bit 0
+}
+
+void initADC_8Bit()
+// 10 Bit 
+{
+  ADMUX =
+     (0 << ADLAR) |     // do not left shift result (for 10-bit values)
+            (1 << REFS2) |     // Sets ref. voltage to internal 1.1V, bit 2
+            (0 << REFS1) |     // Sets ref. voltage to internal 1.1V, bit 1
+            (0 << REFS0) |     // Sets ref. voltage to internal 1.1V, bit 0
+            (0 << MUX3)  |     // use ADC2 for input (PB4), MUX bit 3
+            (0 << MUX2)  |     // use ADC2 for input (PB4), MUX bit 2
+            (1 << MUX1)  |     // use ADC2 for input (PB4), MUX bit 1
+            (0 << MUX0);       // use ADC2 for input (PB4), MUX bit 0
+
+  ADCSRA =
+            (1 << ADEN)  |     // Enable ADC
+            (1 << ADPS2) |     // set prescaler to 64, bit 2
+            (1 << ADPS1) |     // set prescaler to 64, bit 1
+            (1 << ADPS0);      // set prescaler to 64, bit 0
 }
 
 int measure_adc(void)
 {
-  initADC();
+  initADC_10Bit();
+
+  digitalWrite(PIN, LOW);
 
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
   uint16_t raw_adc;
@@ -57,7 +79,7 @@ int measure_adc(void)
 
 int measure_cap(void)
 {
-  initADC();
+  initADC_10Bit();
   uint16_t cap=0;
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
 
@@ -119,8 +141,8 @@ void setup()
 void loop()
 {
   //sensordata = 512;
-  sensordata = measure_cap();
-  //sensordata = measure_adc();
+  //sensordata = measure_cap();
+  sensordata = measure_adc();
   TinyWireS_stop_check();
 
 }

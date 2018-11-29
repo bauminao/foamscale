@@ -1,12 +1,12 @@
 .TITLE Loading of capacity
 *************************
 *
-V1 1 0 PULSE (0 5 1ms 1ns 1ns 5ms 10ms)
+V1 1 0 PULSE (0 5 10us 1ns 1ns 1ms)
 *
-R1 1 2 7.3Meg
-C1 2 0 20pF  
+R1 1 2 1.0Meg
+C1 2 0 10pF  
 *
-.TRAN 10us 10ms
+.TRAN 10us 500us
 *
 .control
 run
