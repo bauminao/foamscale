@@ -9,7 +9,7 @@ U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);   // Adafr
 
 #define RST_OLED 16
 
-int deltaT = 0;
+#define datasize 64 
 
 void setup() {
   pinMode(RST_OLED, OUTPUT);
@@ -19,68 +19,71 @@ void setup() {
 
   u8x8.begin();
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0,0,"Init");
+  u8x8.drawString(0,0,"Init  3");
 
   Wire.begin();
 
   Serial.begin(115200);
 
   delay(1000);
+  u8x8.drawString(0,0,"Init  2");
+  delay(1000);
+  u8x8.drawString(0,0,"Init  1");
+  delay(1000);
+  u8x8.drawString(0,0,"Init  0");
+  delay(1000);
 }
 
 void loop()
 {
   // Ask at sensor about measurement
-  Wire.requestFrom(4, 4); // request 1 byte from slave device address 4
-
-  int data = 0;
   char buf[5];
-  byte receive[5];
-  receive[0] = 0;
-  receive[1] = 1;
-  receive[2] = 2;
-  receive[3] = 3;
+  byte receive[256] = {};
+  int  data[datasize]        = {};
 
   byte i = 0;
 
+  Wire.requestFrom(4, datasize); // request 1 byte from slave device address 4
+
   while(Wire.available()) // slave may send less than requested
   {
+    u8x8.drawString(0,0,"Reading       ");
+    itoa(i , buf , 10);
+    u8x8.drawString( 8 , 0 , buf);
     receive[i] = Wire.read();
     i++;
+  }
+  for (int k=0; k < datasize ; k++)
+  {
+    data[k] = ((receive[k*2] & 0xFF) << 8) | (receive[k*2+1] & 0xFF);
   }
   
   u8x8.begin();
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0,0,"Reading");
+  //u8x8.drawString(0,0,"Values       ");
+  u8x8.drawString(0,1,"             ");
   u8x8.drawString(0,2,"             ");
   u8x8.drawString(0,3,"             ");
 
-  for (int j=0; j <= 3 ; j++)
+  for (byte j = 0; j < datasize ; j=j+2)
   {
-    Serial.println(receive[j]);
-    itoa(receive[j], buf, 10);
-    u8x8.drawString( (j*4) , 2 , buf);
+    itoa(j , buf , 10);
+    u8x8.drawString( 0 , 2 , buf);
+
+    itoa(data[j] , buf , 10);
+    u8x8.drawString( 0 , 3 , buf);
+
+    itoa(j+1 , buf , 10);
+    u8x8.drawString( 8 , 2 , buf);
+
+    itoa(data[j+1] , buf , 10);
+    u8x8.drawString( 8 , 3 , buf);
+
+    delay (200);
   }
 
-  int intvalue1 = ((receive[0] & 0xFF) << 8) | (receive[1] & 0xFF);
-  int intvalue2 = ((receive[2] & 0xFF) << 8) | (receive[3] & 0xFF);
 
-  deltaT = (intvalue2 - intvalue1);
-
-  //u8x8.drawString( 0 , 3 , "Time:       x 8us");
-
-  //itoa(deltaT, buf, 10);
-  //u8x8.drawString( 6, 3 , buf);
-
-  int intvalue = ((receive[0] & 0xFF) << 8) | (receive[1] & 0xFF);
-  itoa(intvalue, buf, 10);
-  u8x8.drawString( 0 , 3 , buf);
-
-  intvalue = ((receive[2] & 0xFF) << 8) | (receive[3] & 0xFF);
-  itoa(intvalue, buf, 10);
-  u8x8.drawString( 8 , 3 , buf);
-
-
+  u8x8.drawString(0,0,"Time to flash");
   delay(5000);
 }
 
