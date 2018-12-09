@@ -192,7 +192,7 @@ void calculate_values (byte _sensor) {
     result = result + sensor[i];
   }
 
-  result = result / SENSOR_AMOUNT;
+  result = result / (SENSOR_AMOUNT - 1);
 
   if (debug_level > 0 ) { 
     Serial.print("SUM.Value: ");
@@ -332,10 +332,10 @@ void loop() {
   }
 
   // Reset all Sensors with an delay of 0.5s
-  Sensor_Reset(500);
+  Sensor_Reset(1000);
 
   // Wait for Restart
-  RestartLoop(5,500);
+  RestartLoop(2,100);
 }
 
 
