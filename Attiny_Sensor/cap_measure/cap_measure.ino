@@ -11,10 +11,9 @@
 #define ADC 4
 #define CHARGE 3
 
-#define runs     10              // Measurement points
-#define datasize 40              // (2 byte for time + 2 byte for voltage ) x runs
-
-#define I2C_SLAVE_ADDRESS 0x04
+#define runs     20              // Measurement points
+#define datasize 80              // (2 byte for time + 2 byte for voltage ) x runs
+#define I2C_SLAVE_ADDRESS 11
 
 #include <TinyWireS.h>
 
@@ -48,16 +47,21 @@ void setup () {
   digitalWrite(LED , LOW);
   tws_delay(500);
 
-  analogReference(DEFAULT);
-
-  digitalWrite(   LED , HIGH);
-  digitalWrite(CHARGE , HIGH);
-
   int run     = 0;
   int voltage [runs] = {};
   int    time [runs] = {};
 
-  for (run = 0 ; run < runs ; run++)
+  analogReference(DEFAULT);
+
+  time [0] = micros();
+  voltage [0] = analogRead(2);
+
+  digitalWrite(   LED , HIGH);
+  digitalWrite(CHARGE , HIGH);
+  time [1] = micros();
+  voltage [1] = analogRead(2);
+
+  for (run = 2 ; run < runs ; run++)
   {
     time [run ]   = micros();
     voltage [run] = analogRead(2);
@@ -74,9 +78,10 @@ void setup () {
     data [run * 4 + 3] = (byte) (voltage [run] & 0xff);
   }
 
+  digitalWrite(CHARGE , LOW);
   digitalWrite(   LED , LOW);
 
-  tws_delay(500);
+  tws_delay(250);
 
   TinyWireS.begin(I2C_SLAVE_ADDRESS); 
   TinyWireS.onRequest(requestEvent);
